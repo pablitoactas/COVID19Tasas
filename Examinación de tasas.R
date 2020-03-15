@@ -3,8 +3,10 @@ library(ggplot2)
 library(leaflet)
 library(htmltools)
 library(htmlwidgets)
+library(tmap)
 library(ggthemes)
 library(table1)
+library(patchwork)
 
 setwd("~/Blogs Personales/JHU-Files/COVID-19/csse_covid_19_data/csse_covid_19_time_series")
 
@@ -46,7 +48,7 @@ summary(RegionRate$fatrate)
 #Density plot
 
 annotation <- data.frame(
-  x = mean(RegionRate$fatrate)+4,
+  x = mean(RegionRate$fatrate)+6,
   y = 0.20,
   label =paste("Tasa Promedio:",round(mean(RegionRate$fatrate), digits=5), "%") )
 
@@ -64,7 +66,7 @@ p1<-ggplot(RegionRate, aes(x=fatrate)) +
             color="steelblue", 
             size=4 , fontface="bold" )
 
-p1
+#p1
 
 #Seleccionemos todo lo que tenga casos positivos
 
@@ -78,7 +80,7 @@ summary(Nonzeroregion$fatrate)
 #Density plot
 
 annotation2 <- data.frame(
-  x = mean(RegionRate$fatrate)+4,
+  x = mean(RegionRate$fatrate)+8,
   y = 0.8,
   label =paste("Tasa Promedio:",round(mean(Nonzeroregion$fatrate), digits=5), "%") )
 
@@ -96,7 +98,7 @@ p2<-ggplot(Nonzeroregion, aes(x=fatrate)) +
             color="steelblue", 
             size=4 , fontface="bold" )
 
-p2
+#p2
 
 #Que países tienen tasa de 100%?
 RegionRate[which(RegionRate$fatrate==100),]
@@ -111,10 +113,13 @@ CountryGrouped<-Merged%>%group_by(Country.Region)%>%
 
 CountryRate<-CountryGrouped%>%
               mutate(fatrate=(Death.3.14.20/Case.3.14.20)*100)
+
+summary(CountryRate$fatrate)
+
 #Density plot
 
 annotation3 <- data.frame(
-  x = mean(CountryRate$fatrate)+4,
+  x = mean(CountryRate$fatrate)+5,
   y = 0.80,
   label =paste("Tasa Promedio:",round(mean(CountryRate$fatrate), digits=5), "%") )
 
@@ -132,7 +137,7 @@ p3<-ggplot(CountryRate, aes(x=fatrate)) +
             color="steelblue", 
             size=4 , fontface="bold" )
 
-p3
+#p3
 
 
 
@@ -142,10 +147,10 @@ CountryRate$fatrate[is.na(CountryRate$fatrate)] <- 0
 #Filtrando casos con 0
 NonzeroCount<-CountryRate%>%filter(Case.3.14.20>0)
 
-
+summary(NonzeroCount$fatrate)
 
 annotation4 <- data.frame(
-  x = mean(NonzeroCount$fatrate)+4,
+  x = mean(NonzeroCount$fatrate)+5,
   y = 0.80,
   label =paste("Tasa Promedio:",round(mean(NonzeroCount$fatrate), digits=5), "%") )
 
@@ -163,7 +168,7 @@ p4<-ggplot(NonzeroCount, aes(x=fatrate)) +
             color="steelblue", 
             size=4 , fontface="bold" )
 
-p4
+#p4
 
 
 ##Paises y regiones donde hubieron muertes
@@ -173,7 +178,7 @@ summary(DeathRegion$fatrate)
 
 
 annotation5 <- data.frame(
-  x = mean(DeathRegion$fatrate)+5,
+  x = mean(DeathRegion$fatrate)+4,
   y = 0.4,
   label =paste("Tasa Promedio:",round(mean(DeathRegion$fatrate), digits=5), "%") )
 
@@ -182,7 +187,7 @@ p5<-ggplot(DeathRegion, aes(x=fatrate)) +
   geom_vline(aes(xintercept=mean(fatrate)),
              color="steelblue", linetype="dashed", size=1)+
   coord_cartesian(xlim=c(-1,22))+
-  ggtitle("Tasas de mortalidad vs. densidad por región (con muertes)")+
+  ggtitle("Tasas de mortalidad vs. densidad por región y provincia(con muertes)")+
   xlab("Tasa de mortalidad en %")+
   ylab("Densidad")+
   theme_tufte()+
@@ -191,7 +196,7 @@ p5<-ggplot(DeathRegion, aes(x=fatrate)) +
             color="steelblue", 
             size=4 , fontface="bold" )
 
-p5
+#p5
 
 #Pais con muertes
 
@@ -211,7 +216,7 @@ p6<-ggplot(DeathCountry, aes(x=fatrate)) +
   geom_vline(aes(xintercept=mean(fatrate)),
              color="steelblue", linetype="dashed", size=1)+
   coord_cartesian(xlim=c(-1,22))+
-  ggtitle("Tasas de mortalidad vs. densidad por región (con muertes)")+
+  ggtitle("Tasas de mortalidad vs. densidad por país (con muertes)")+
   xlab("Tasa de mortalidad en %")+
   ylab("Densidad")+
   theme_tufte()+
@@ -220,10 +225,19 @@ p6<-ggplot(DeathCountry, aes(x=fatrate)) +
             color="steelblue", 
             size=4 , fontface="bold" )
 
-p6
+#p6
+
+
+##Para el post
+
+(p1|p2)/p5
+
+(p3|p4)/p6
 
 
 
+######
+#MAPAS
 
 ####
 #Region Provincia#
